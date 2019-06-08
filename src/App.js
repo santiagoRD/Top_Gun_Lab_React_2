@@ -2,10 +2,16 @@ import React, { Component } from 'react';
 import './App.css';
 import ColorCard from "./components/ColorCard";
 import { COLORS } from "./mocked-data/colors";
+import uuid from "uuid";
 
 class App extends Component {
   state = {
-    colors: COLORS
+    colors: COLORS,
+    filterText: "",
+    nameText:"",
+    lightClassText:"",
+    darkClassText:"",
+    isLight: false
   }
 
   changeTone = (id) => {
@@ -34,8 +40,68 @@ class App extends Component {
     })
   }
 
+
+  handleFilter = (e) => {
+    const value = e.target.value;
+    this.setState({
+      filterText: value
+    })
+  }
+
+  handleInputName = (e) => {
+    const value = e.target.value;
+    this.setState({
+      nameText: value
+    })
+  }
+
+  handleInputLightClass = (e) => {
+    const value = e.target.value;
+    this.setState({
+      lightClassText: value
+    })
+  }
+
+  handleInputDarkClass = (e) => {
+    const value = e.target.value;
+    this.setState({
+      darkClassText: value
+    })
+  }
+
+  handleCheckbox = (e) =>{
+    const opacity = e.target.checked ? true : false;
+    this.setState({
+      isLight: opacity
+    })
+  }
+
+  createColor = (e) =>{
+    e.preventDefault();
+    const newColor = {
+      id: uuid(),
+      name: this.state.nameText,
+      isLight: this.state.isLight,
+      darkClass: this.state.darkClassText,
+      lightClass: this.state.lightClassText
+    }
+
+    this.setState(prevState=> {
+      const oldColors = prevState.colors;
+      return({
+        colors: [...oldColors, newColor],
+        nameText:"",
+        lightClassText:"",
+        darkClassText:"",
+        isLight: false
+      })
+    })
+  }
+
+
   render() {
-    const { colors } = this.state;
+    const { colors, filterText, nameText, lightClassText, darkClassText, isLight } = this.state;
+    const filteredColors = colors.filter( color => color.name.includes(filterText))
 
     return (
       <div className="App">
@@ -45,10 +111,12 @@ class App extends Component {
             placeholder="Filter by color name"
             className="filter-field"
             type="text"
+            onChange={(e) => this.handleFilter(e)}
+            value={filterText}
           />
         </div>
         <main className="color-cards-container">
-          {colors.map(color => (
+          {filteredColors.map(color => (
             <ColorCard
               key={color.id}
               changeColor={() => this.changeTone(color.id)}
@@ -62,22 +130,30 @@ class App extends Component {
           <input
             type="text"
             placeholder="name"
+            value={nameText}
+            onChange={(e) => this.handleInputName(e)}
           />
           <input
             type="text"
             placeholder="light class"
+            onChange={(e) => this.handleInputLightClass(e)}
+            value={lightClassText}
           />
           <input
             type="text"
             placeholder="dark class"
+            onChange={(e) => this.handleInputDarkClass(e)}
+            value={darkClassText}
           />
           <input
             name="is-light"
             type="checkbox"
             className="is-light-checkbox"
+            checked={isLight}
+            onChange={(e) => this.handleCheckbox(e)}
           />
           <label htmlFor="is-light">Is light</label>
-          <button type="submit" className="create-color">Create!</button>
+          <button type="submit" className="create-color" onSubmit={this.createColor}>Create!</button>
         </form>
       </div>
     );
@@ -89,17 +165,17 @@ export default App;
 // ------------------------------------------------------------------------
 
 // 1. Crear un nuevo key en el estado llamado "filterText" e inicializarlo con
-// un string vacío.
+// un string vacío. OK
 
 // 2. Agregar un evento en el input del filtro para que detecte cuando este texto
-// cambia y igualar el valor del input al valor del estado.
+// cambia y igualar el valor del input al valor del estado. OK
 
 // 3. crear un método en la componente para actualizar el texto del filtro
-// en el estado cuando este sea cambiado.
+// en el estado cuando este sea cambiado. OK
 
 // 4. Filtrar los colores del load en el método render y actualizar el arreglo al
 //  que se le hace el map de modo que se muestren sólo los colores
-// filtrados y no todos.
+// filtrados y no todos.OK
 
 // 5. Realizar el mismo procedimiento que se hizo con en los pasos 1, 2 y 3, pero
 // esta vez para los campos: "nameText", "lightClassText", "darkClassText".
@@ -107,7 +183,7 @@ export default App;
 
 // 6. Crear un campo adicional en el estado para el campo "isLight" que corresponde
 // al checkbox del formulario para crear un color, esta vez se debe inicializar el
-// valur en el estado en false.
+// valor en el estado en false.
 // PISTAS:
 // * El valor de este tipo de input no se obtiene en el event.target.value, sino
 //   en el event.target.checked.
